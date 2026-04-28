@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EquiVision – The Unbiased AI Auditor</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Background grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-icon">⚖</span>
+      <span class="logo-text">Equi<span class="accent">Vision</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="#upload">Audit</a>
+      <a href="#results">Results</a>
+      <a href="#simulator">Simulator</a>
+      <span class="nav-badge">Beta</span>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════
+       HERO
+  ════════════════════════════════════ -->
+  <section class="hero" id="home">
+    <div class="hero-eyebrow">
+      <span class="dot dot-pulse"></span>
+      Google Solutions Challenge 2025
+    </div>
+    <h1 class="hero-title">
+      Detect Bias<br/>
+      <span class="title-gradient">Before AI Decides.</span>
+    </h1>
+    <p class="hero-sub">
+      Every biased dataset hides real human cost — unfair loans, ignored résumés, denied care.<br/>
+      <strong>EquiVision</strong> audits your AI before it impacts real lives.
+    </p>
+    <div class="hero-stats">
+      <div class="stat-pill">
+        <span class="stat-num">78%</span>
+        <span class="stat-label">of hiring AIs show measurable gender bias</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">3×</span>
+        <span class="stat-label">higher loan rejection for minority applicants</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">1 tool</span>
+        <span class="stat-label">to detect, understand & fix it</span>
+      </div>
+    </div>
+    <a href="#upload" class="cta-btn">
+      <span>Start Auditing</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </section>
+
+  <!-- ════════════════════════════════════
+       UPLOAD
+  ════════════════════════════════════ -->
+  <section class="section" id="upload">
+    <div class="section-label">Step 01 — Upload</div>
+    <h2 class="section-title">Upload Your Dataset</h2>
+    <p class="section-desc">Drop a CSV file containing your AI training or decision data. EquiVision will find fairness issues instantly.</p>
+
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <p class="upload-title">Drag &amp; drop your CSV file here</p>
+      <p class="upload-hint">or click to browse — supports .csv files up to 50MB</p>
+      <input type="file" id="fileInput" accept=".csv" hidden />
+      <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">Choose File</button>
+      <div class="file-status" id="fileStatus"></div>
+    </div>
+
+    <div class="upload-actions">
+      <button class="btn-primary" id="analyzeBtn" onclick="analyzeDataset()">
+        <span id="btnText">Analyze Dataset</span>
+        <span id="btnSpinner" class="spinner" style="display:none"></span>
+      </button>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       RESULTS DASHBOARD
+  ════════════════════════════════════ -->
+  <section class="section hidden" id="results">
+    <div class="section-label">Step 02 — Audit Results</div>
+    <h2 class="section-title">Fairness Report</h2>
+    <p class="section-desc">Here's what EquiVision found in your dataset. Results are color-coded for instant clarity.</p>
+
+    <div class="verdict-banner" id="verdictBanner">
+      <span id="verdictIcon">⚠</span>
+      <span id="verdictText">Bias Detected in Dataset</span>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- Disparate Impact -->
+      <div class="card" id="cardDI">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <span class="card-title">Disparate Impact</span>
+          <div class="tooltip-wrap">
+            <span class="tooltip-trigger">?</span>
+            <div class="tooltip-box">Ratio of minority to majority success rate. Fair if ≥ 0.8 (80% rule). Values below 0.8 suggest discrimination.</div>
+          </div>
+        </div>
+        <div class="card-metric" id="metricDI">—</div>
+        <div class="card-bar"><div class="bar-fill" id="barDI"></div></div>
+        <div class="card-tag" id="tagDI">–</div>
+      </div>
+
+      <!-- Statistical Parity -->
+      <div class="card" id="cardSP">
+        <div class="card-header">
+          <span class="card-icon">📉</span>
+          <span class="card-title">Statistical Parity</span>
+          <div class="tooltip-wrap">
+            <span class="tooltip-trigger">?</span>
+            <div class="tooltip-box">Difference in positive outcome rates between groups. Closer to 0 means more equal treatment.</div>
+          </div>
+        </div>
+        <div class="card-metric" id="metricSP">—</div>
+        <div class="card-tag" id="tagSP">–</div>
+        <div class="parity-scale">
+          <span>−1 (worst)</span>
+          <div class="parity-track"><div class="parity-thumb" id="parityThumb"></div></div>
+          <span>0 (ideal)</span>
+        </div>
+      </div>
+
+      <!-- Majority Rate -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">👥</span>
+          <span class="card-title">Majority Group Rate</span>
+        </div>
+        <div class="card-metric accent-green" id="metricMaj">—</div>
+        <div class="card-tag tag-neutral">Success / Positive Outcome</div>
+      </div>
+
+      <!-- Minority Rate -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">👤</span>
+          <span class="card-title">Minority Group Rate</span>
+        </div>
+        <div class="card-metric accent-red" id="metricMin">—</div>
+        <div class="card-tag tag-neutral">Success / Positive Outcome</div>
+      </div>
+
+    </div>
+
+    <!-- AI Explanation Card -->
+    <div class="ai-card">
+      <div class="ai-card-header">
+        <span class="ai-badge">⚡ AI Insight</span>
+        <span class="ai-model">EquiVision Analysis Engine</span>
+      </div>
+      <p class="ai-text" id="aiExplanation">Loading explanation…</p>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       CHART
+  ════════════════════════════════════ -->
+  <section class="section hidden" id="chartSection">
+    <div class="section-label">Step 03 — Visual Analytics</div>
+    <h2 class="section-title">Group Outcome Comparison</h2>
+    <p class="section-desc">Side-by-side success rate comparison between population groups, giving you instant visual clarity.</p>
+    <div class="chart-wrapper">
+      <canvas id="biasChart"></canvas>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       WHAT-IF SIMULATOR
+  ════════════════════════════════════ -->
+  <section class="section hidden" id="simulator">
+    <div class="section-label">Step 04 — What-If Simulator</div>
+    <h2 class="section-title">How Do We Fix It?</h2>
+    <p class="section-desc">Adjust the minority success rate and see live how fairness improves. This is the power of proactive bias correction.</p>
+
+    <div class="simulator-card">
+      <div class="sim-row">
+        <label class="sim-label">Adjust Minority Success Rate</label>
+        <span class="sim-value" id="simMinVal">40%</span>
+      </div>
+      <input type="range" class="sim-slider" id="simSlider" min="0" max="100" value="40" oninput="updateSimulator(this.value)" />
+      <div class="sim-ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+
+      <div class="sim-results">
+        <div class="sim-metric-card">
+          <span class="sim-metric-label">Simulated Disparate Impact</span>
+          <span class="sim-metric-val" id="simDI">—</span>
+          <span class="sim-status" id="simStatus">–</span>
+        </div>
+        <div class="sim-metric-card">
+          <span class="sim-metric-label">Majority Rate (Fixed)</span>
+          <span class="sim-metric-val accent-green" id="simMajFixed">—</span>
+        </div>
+        <div class="sim-metric-card">
+          <span class="sim-metric-label">Fairness Gap</span>
+          <span class="sim-metric-val" id="simGap">—</span>
+        </div>
+      </div>
+
+      <div class="sim-verdict" id="simVerdict"></div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════
+       BEFORE vs AFTER
+  ════════════════════════════════════ -->
+  <section class="section hidden" id="beforeAfter">
+    <div class="section-label">Step 05 — Impact Projection</div>
+    <h2 class="section-title">Before vs After Fairness</h2>
+    <p class="section-desc">See the concrete human impact of fixing bias in your AI system.</p>
+
+    <div class="ba-wrapper">
+      <div class="ba-card ba-before">
+        <div class="ba-label">
+          <span class="ba-dot dot-red"></span>
+          Current Dataset
+        </div>
+        <div class="ba-metric" id="baBeforeDI">DI: —</div>
+        <div class="ba-metric-sub" id="baBeforeMin">Minority Rate: —</div>
+        <div class="ba-bar-wrap">
+          <span>Majority</span>
+          <div class="ba-bar"><div class="ba-fill ba-fill-green" id="baBeforeMajBar"></div></div>
+          <span id="baBeforeMajPct">—</span>
+        </div>
+        <div class="ba-bar-wrap">
+          <span>Minority</span>
+          <div class="ba-bar"><div class="ba-fill ba-fill-red" id="baBeforeMinBar"></div></div>
+          <span id="baBeforeMinPct">—</span>
+        </div>
+        <div class="ba-verdict biased">⚠ Biased</div>
+      </div>
+
+      <div class="ba-arrow">→</div>
+
+      <div class="ba-card ba-after">
+        <div class="ba-label">
+          <span class="ba-dot dot-green"></span>
+          Improved Dataset
+        </div>
+        <div class="ba-metric" id="baAfterDI">DI: —</div>
+        <div class="ba-metric-sub" id="baAfterMin">Minority Rate: —</div>
+        <div class="ba-bar-wrap">
+          <span>Majority</span>
+          <div class="ba-bar"><div class="ba-fill ba-fill-green" id="baAfterMajBar"></div></div>
+          <span id="baAfterMajPct">—</span>
+        </div>
+        <div class="ba-bar-wrap">
+          <span>Minority</span>
+          <div class="ba-bar"><div class="ba-fill ba-fill-green" id="baAfterMinBar"></div></div>
+          <span id="baAfterMinPct">—</span>
+        </div>
+        <div class="ba-verdict fair">✅ Fair</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>⚖ <strong>EquiVision</strong> — Prevent unfair decisions before they happen.</p>
+    <p class="footer-sub">Built for Google Solutions Challenge · Ethical AI · Fair Systems</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
